@@ -1,0 +1,658 @@
+{
+  "rules": {
+    "gameName": "Insane Monopoly 3D",
+    "minPlayers": 2,
+    "maxPlayers": 8,
+    "startingCash": 2500,
+    "goSalary": 300,
+    "jailFine": 75,
+    "maxDoublesBeforeJail": 3,
+    "auctionEnabled": true,
+    "freeParkingJackpot": true,
+    "upgradeLevels": 5,
+    "cashReserve": 250
+  },
+  "spaces": [
+    {
+      "id": "go",
+      "name": "GO Mega Launch",
+      "kind": "go",
+      "color": "#22c55e",
+      "price": 0,
+      "rent": 0,
+      "description": "Collect salary and rocket back into the economy."
+    },
+    {
+      "id": "neon-arcade",
+      "name": "Neon Arcade",
+      "kind": "property",
+      "set": "Glitch Alley",
+      "color": "#8b5cf6",
+      "price": 80,
+      "rent": 10,
+      "description": "Cheap, loud, and suspiciously profitable.",
+      "houseCost": 50,
+      "mortgageValue": 40,
+      "houseRent": [
+        50,
+        150,
+        450,
+        800
+      ],
+      "hotelRent": 1250
+    },
+    {
+      "id": "chaos-chest-1",
+      "name": "Chaos Chest",
+      "kind": "card",
+      "cardDeck": "chaos",
+      "color": "#38bdf8",
+      "price": 0,
+      "rent": 0,
+      "description": "Draw a Chaos Chest card."
+    },
+    {
+      "id": "pixel-pawnshop",
+      "name": "Pixel Pawnshop",
+      "kind": "property",
+      "set": "Glitch Alley",
+      "color": "#8b5cf6",
+      "price": 100,
+      "rent": 14,
+      "description": "Where bankrupt dreams become inventory.",
+      "houseCost": 50,
+      "mortgageValue": 50,
+      "houseRent": [
+        70,
+        210,
+        630,
+        1120
+      ],
+      "hotelRent": 1750
+    },
+    {
+      "id": "tax-1",
+      "name": "Luxury Rage Tax",
+      "kind": "tax",
+      "color": "#ef4444",
+      "price": 0,
+      "rent": 0,
+      "amount": 150,
+      "description": "Pay for being too shiny."
+    },
+    {
+      "id": "subway",
+      "name": "Hyperspeed Subway",
+      "kind": "railroad",
+      "set": "Transit",
+      "color": "#64748b",
+      "price": 220,
+      "rent": 30,
+      "description": "Fast travel with surge pricing.",
+      "mortgageValue": 110,
+      "houseCost": 0,
+      "houseRent": [],
+      "hotelRent": 0
+    },
+    {
+      "id": "lava-lounge",
+      "name": "Lava Lounge",
+      "kind": "property",
+      "set": "Volcano Strip",
+      "color": "#f97316",
+      "price": 140,
+      "rent": 18,
+      "description": "Tables are hot. So is the rent.",
+      "houseCost": 70,
+      "mortgageValue": 70,
+      "houseRent": [
+        90,
+        270,
+        810,
+        1440
+      ],
+      "hotelRent": 2250
+    },
+    {
+      "id": "chance-1",
+      "name": "Mutation Chance",
+      "kind": "card",
+      "cardDeck": "mutation",
+      "color": "#facc15",
+      "price": 0,
+      "rent": 0,
+      "description": "Draw a Mutation Chance card."
+    },
+    {
+      "id": "magma-mall",
+      "name": "Magma Mall",
+      "kind": "property",
+      "set": "Volcano Strip",
+      "color": "#f97316",
+      "price": 160,
+      "rent": 22,
+      "description": "Impulse buys, molten escalators.",
+      "houseCost": 80,
+      "mortgageValue": 80,
+      "houseRent": [
+        110,
+        330,
+        990,
+        1760
+      ],
+      "hotelRent": 2750
+    },
+    {
+      "id": "jail",
+      "name": "Jail / Just Visiting",
+      "kind": "jail",
+      "color": "#334155",
+      "price": 0,
+      "rent": 0,
+      "description": "Cool off behind laser bars."
+    },
+    {
+      "id": "moon-motel",
+      "name": "Moon Motel",
+      "kind": "property",
+      "set": "Cosmic Row",
+      "color": "#0ea5e9",
+      "price": 180,
+      "rent": 26,
+      "description": "Low gravity, high deposits.",
+      "houseCost": 90,
+      "mortgageValue": 90,
+      "houseRent": [
+        130,
+        390,
+        1170,
+        2080
+      ],
+      "hotelRent": 3250
+    },
+    {
+      "id": "casino",
+      "name": "Quantum Casino",
+      "kind": "special",
+      "color": "#ec4899",
+      "price": 0,
+      "rent": 0,
+      "description": "Gamble with reality itself."
+    },
+    {
+      "id": "orbit-office",
+      "name": "Orbit Office Park",
+      "kind": "property",
+      "set": "Cosmic Row",
+      "color": "#0ea5e9",
+      "price": 200,
+      "rent": 30,
+      "description": "Corporate synergy in a vacuum.",
+      "houseCost": 100,
+      "mortgageValue": 100,
+      "houseRent": [
+        150,
+        450,
+        1350,
+        2400
+      ],
+      "hotelRent": 3750
+    },
+    {
+      "id": "fusion-power",
+      "name": "Fusion Power Utility",
+      "kind": "utility",
+      "set": "Utilities",
+      "color": "#14b8a6",
+      "price": 180,
+      "rent": 0,
+      "description": "Rent scales with dice chaos.",
+      "mortgageValue": 90,
+      "houseCost": 0,
+      "houseRent": [],
+      "hotelRent": 0
+    },
+    {
+      "id": "meteor-market",
+      "name": "Meteor Market",
+      "kind": "property",
+      "set": "Cosmic Row",
+      "color": "#0ea5e9",
+      "price": 220,
+      "rent": 34,
+      "description": "Flash sales every impact.",
+      "houseCost": 110,
+      "mortgageValue": 110,
+      "houseRent": [
+        170,
+        510,
+        1530,
+        2720
+      ],
+      "hotelRent": 4250
+    },
+    {
+      "id": "black-hole",
+      "name": "Black Hole Bailout",
+      "kind": "special",
+      "color": "#111827",
+      "price": 0,
+      "rent": 0,
+      "description": "Teleport to a random corner and brace yourself."
+    },
+    {
+      "id": "dragon-diner",
+      "name": "Dragon Diner",
+      "kind": "property",
+      "set": "Mythic Mile",
+      "color": "#dc2626",
+      "price": 240,
+      "rent": 38,
+      "description": "Flame grilled assets.",
+      "houseCost": 120,
+      "mortgageValue": 120,
+      "houseRent": [
+        190,
+        570,
+        1710,
+        3040
+      ],
+      "hotelRent": 4750
+    },
+    {
+      "id": "chaos-chest-2",
+      "name": "Chaos Chest",
+      "kind": "card",
+      "cardDeck": "chaos",
+      "color": "#38bdf8",
+      "price": 0,
+      "rent": 0,
+      "description": "Draw a Chaos Chest card."
+    },
+    {
+      "id": "wizard-warehouse",
+      "name": "Wizard Warehouse",
+      "kind": "property",
+      "set": "Mythic Mile",
+      "color": "#dc2626",
+      "price": 260,
+      "rent": 42,
+      "description": "Bulk spells, wholesale curses.",
+      "houseCost": 130,
+      "mortgageValue": 130,
+      "houseRent": [
+        210,
+        630,
+        1890,
+        3360
+      ],
+      "hotelRent": 5250
+    },
+    {
+      "id": "free-parking",
+      "name": "Free Parking Jackpot",
+      "kind": "freeParking",
+      "color": "#22d3ee",
+      "price": 0,
+      "rent": 0,
+      "description": "Land here to scoop the madness pot."
+    },
+    {
+      "id": "kaiju-crossing",
+      "name": "Kaiju Crossing",
+      "kind": "property",
+      "set": "Monster District",
+      "color": "#16a34a",
+      "price": 280,
+      "rent": 46,
+      "description": "Insurance premiums are legendary.",
+      "houseCost": 140,
+      "mortgageValue": 140,
+      "houseRent": [
+        230,
+        690,
+        2070,
+        3680
+      ],
+      "hotelRent": 5750
+    },
+    {
+      "id": "monorail",
+      "name": "Sky Monorail",
+      "kind": "railroad",
+      "set": "Transit",
+      "color": "#64748b",
+      "price": 220,
+      "rent": 30,
+      "description": "The view is free. The fare is not.",
+      "mortgageValue": 110,
+      "houseCost": 0,
+      "houseRent": [],
+      "hotelRent": 0
+    },
+    {
+      "id": "mutant-museum",
+      "name": "Mutant Museum",
+      "kind": "property",
+      "set": "Monster District",
+      "color": "#16a34a",
+      "price": 300,
+      "rent": 50,
+      "description": "Do not touch the exhibits. They touch back.",
+      "houseCost": 150,
+      "mortgageValue": 150,
+      "houseRent": [
+        250,
+        750,
+        2250,
+        4000
+      ],
+      "hotelRent": 6250
+    },
+    {
+      "id": "chance-2",
+      "name": "Mutation Chance",
+      "kind": "card",
+      "cardDeck": "mutation",
+      "color": "#facc15",
+      "price": 0,
+      "rent": 0,
+      "description": "Draw a Mutation Chance card."
+    },
+    {
+      "id": "alien-aquarium",
+      "name": "Alien Aquarium",
+      "kind": "property",
+      "set": "Monster District",
+      "color": "#16a34a",
+      "price": 320,
+      "rent": 54,
+      "description": "The fish are buying real estate.",
+      "houseCost": 160,
+      "mortgageValue": 160,
+      "houseRent": [
+        270,
+        810,
+        2430,
+        4320
+      ],
+      "hotelRent": 6750
+    },
+    {
+      "id": "go-to-jail",
+      "name": "Go to Jail Cannon",
+      "kind": "goToJail",
+      "color": "#991b1b",
+      "price": 0,
+      "rent": 0,
+      "description": "Instant launch to laser jail."
+    },
+    {
+      "id": "robot-resort",
+      "name": "Robot Resort",
+      "kind": "property",
+      "set": "Cyber Heights",
+      "color": "#6366f1",
+      "price": 350,
+      "rent": 60,
+      "description": "Amenities optimized by ruthless algorithms.",
+      "houseCost": 180,
+      "mortgageValue": 175,
+      "houseRent": [
+        300,
+        900,
+        2700,
+        4800
+      ],
+      "hotelRent": 7500
+    },
+    {
+      "id": "crypto-cloud",
+      "name": "Crypto Cloud Utility",
+      "kind": "utility",
+      "set": "Utilities",
+      "color": "#14b8a6",
+      "price": 180,
+      "rent": 0,
+      "description": "Rent volatility included.",
+      "mortgageValue": 90,
+      "houseCost": 0,
+      "houseRent": [],
+      "hotelRent": 0
+    },
+    {
+      "id": "hacker-hotel",
+      "name": "Hacker Hotel",
+      "kind": "property",
+      "set": "Cyber Heights",
+      "color": "#6366f1",
+      "price": 375,
+      "rent": 68,
+      "description": "Every room has root access.",
+      "houseCost": 190,
+      "mortgageValue": 187,
+      "houseRent": [
+        340,
+        1020,
+        3060,
+        5440
+      ],
+      "hotelRent": 8500
+    },
+    {
+      "id": "warp-tax",
+      "name": "Warp Speed Tax",
+      "kind": "tax",
+      "color": "#ef4444",
+      "price": 0,
+      "rent": 0,
+      "amount": 250,
+      "description": "Pay to keep moving too fast."
+    },
+    {
+      "id": "dino-dome",
+      "name": "Dino Dome",
+      "kind": "property",
+      "set": "Primal Plaza",
+      "color": "#84cc16",
+      "price": 400,
+      "rent": 76,
+      "description": "Jurassic zoning loopholes.",
+      "houseCost": 200,
+      "mortgageValue": 200,
+      "houseRent": [
+        380,
+        1140,
+        3420,
+        6080
+      ],
+      "hotelRent": 9500
+    },
+    {
+      "id": "teleporter",
+      "name": "Teleporter Hub",
+      "kind": "railroad",
+      "set": "Transit",
+      "color": "#64748b",
+      "price": 220,
+      "rent": 30,
+      "description": "Arrive before you leave.",
+      "mortgageValue": 110,
+      "houseCost": 0,
+      "houseRent": [],
+      "hotelRent": 0
+    },
+    {
+      "id": "time-share",
+      "name": "Time-Share Tower",
+      "kind": "property",
+      "set": "Primal Plaza",
+      "color": "#84cc16",
+      "price": 425,
+      "rent": 84,
+      "description": "Own next Thursday forever.",
+      "houseCost": 210,
+      "mortgageValue": 212,
+      "houseRent": [
+        420,
+        1260,
+        3780,
+        6720
+      ],
+      "hotelRent": 10500
+    },
+    {
+      "id": "chaos-chest-3",
+      "name": "Chaos Chest",
+      "kind": "card",
+      "cardDeck": "chaos",
+      "color": "#38bdf8",
+      "price": 0,
+      "rent": 0,
+      "description": "Draw a Chaos Chest card."
+    },
+    {
+      "id": "volcano-vault",
+      "name": "Volcano Vault",
+      "kind": "property",
+      "set": "Primal Plaza",
+      "color": "#84cc16",
+      "price": 450,
+      "rent": 92,
+      "description": "Premium lava-facing units.",
+      "houseCost": 220,
+      "mortgageValue": 225,
+      "houseRent": [
+        460,
+        1380,
+        4140,
+        7360
+      ],
+      "hotelRent": 11500
+    },
+    {
+      "id": "planet-palace",
+      "name": "Planet Palace",
+      "kind": "property",
+      "set": "Final Boss Row",
+      "color": "#eab308",
+      "price": 500,
+      "rent": 110,
+      "description": "A palace large enough to have weather.",
+      "houseCost": 250,
+      "mortgageValue": 250,
+      "houseRent": [
+        550,
+        1650,
+        4950,
+        8800
+      ],
+      "hotelRent": 13750
+    },
+    {
+      "id": "chance-3",
+      "name": "Mutation Chance",
+      "kind": "card",
+      "cardDeck": "mutation",
+      "color": "#facc15",
+      "price": 0,
+      "rent": 0,
+      "description": "Draw a Mutation Chance card."
+    },
+    {
+      "id": "rocketway",
+      "name": "Rocketway Express",
+      "kind": "railroad",
+      "set": "Transit",
+      "color": "#64748b",
+      "price": 220,
+      "rent": 30,
+      "description": "Mind the exhaust gap.",
+      "mortgageValue": 110,
+      "houseCost": 0,
+      "houseRent": [],
+      "hotelRent": 0
+    },
+    {
+      "id": "godzilla-gardens",
+      "name": "Godzilla Gardens",
+      "kind": "property",
+      "set": "Final Boss Row",
+      "color": "#eab308",
+      "price": 550,
+      "rent": 130,
+      "description": "The endgame rent monster.",
+      "houseCost": 280,
+      "mortgageValue": 275,
+      "houseRent": [
+        650,
+        1950,
+        5850,
+        10400
+      ],
+      "hotelRent": 16250
+    },
+    {
+      "id": "final-boss",
+      "name": "Final Boss Toll",
+      "kind": "special",
+      "color": "#7f1d1d",
+      "price": 0,
+      "rent": 0,
+      "amount": 100,
+      "description": "Pay the table leader or trigger a comeback event."
+    }
+  ],
+  "cards": [
+    {
+      "deck": "chaos",
+      "title": "Bank Error in Your Favor, Somehow",
+      "body": "Collect $250 and move one bonus space.",
+      "cashDelta": 250,
+      "moveDelta": 1
+    },
+    {
+      "deck": "chaos",
+      "title": "House Party Damage",
+      "body": "Pay $50 per upgrade you own.",
+      "cashDelta": -50
+    },
+    {
+      "deck": "chaos",
+      "title": "Sponsor Deal",
+      "body": "Collect $100 from the bank.",
+      "cashDelta": 100
+    },
+    {
+      "deck": "chaos",
+      "title": "Cosmic Audit",
+      "body": "Pay $200 or mortgage one property.",
+      "cashDelta": -200
+    },
+    {
+      "deck": "mutation",
+      "title": "Warp to GO",
+      "body": "Advance to GO and collect salary.",
+      "moveToSpaceId": "go",
+      "cashDelta": 300
+    },
+    {
+      "deck": "mutation",
+      "title": "Jail Cannon Misfire",
+      "body": "Go directly to Jail.",
+      "moveToSpaceId": "jail"
+    },
+    {
+      "deck": "mutation",
+      "title": "Rent Surge",
+      "body": "Your next owned property charges double rent.",
+      "statusEffect": "doubleRent"
+    },
+    {
+      "deck": "mutation",
+      "title": "Reality Rebate",
+      "body": "Collect $75 from every player in a complete version.",
+      "cashDelta": 75
+    }
+  ]
+}
