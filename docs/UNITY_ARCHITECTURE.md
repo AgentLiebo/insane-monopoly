@@ -100,13 +100,3 @@ Rent calculation lives in `MonopolyRules.CalculateRent` and handles:
 ## Save system
 
 `SaveSystem` exports a serializable JSON snapshot with player cash, positions, Jail state, bankrupt flags, property ledger entries, Free Parking pot, current turn, and event log.
-
-## Optimization and audit notes
-
-The runtime systems now avoid several common Unity prototype pitfalls:
-
-- Property lookups are cached by `MonopolyRuntimeContext` instead of repeatedly scanning the full board for set, railroad, utility, and id lookups.
-- `PropertyLedger` keeps a stable list plus dictionary so HUD and gameplay code can count/collect owned deeds without LINQ allocations.
-- Board ownership and building markers are created lazily only when a space actually needs them, and marker materials are reused instead of recreated every sync.
-- `TurnController` synchronizes board visuals only after state-changing actions such as purchases, auctions, trades, bankruptcy, and building changes.
-- Save export clones ledger entries instead of handing out mutable runtime state references.

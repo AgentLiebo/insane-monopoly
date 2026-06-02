@@ -16,5 +16,3 @@ PlayerSettings:
   forceSingleInstance: 0
   resizableWindow: 1
   useMacAppStoreValidation: 0
-  activeInputHandler: 2
-  disableOldInputManagerSupport: 0
