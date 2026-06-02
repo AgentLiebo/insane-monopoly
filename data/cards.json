@@ -1,0 +1,12 @@
+[
+  { "id": "chance_go", "deck": "chance", "title": "Reality Slingshot", "text": "Advance to GO and collect salary.", "effect": { "type": "moveTo", "spaceId": "go", "collectSalary": true } },
+  { "id": "chance_jail", "deck": "chance", "title": "Rules Lawyered", "text": "Go directly to Jail.", "effect": { "type": "goToJail" } },
+  { "id": "chance_repair", "deck": "chance", "title": "Mandatory Upkeep", "text": "Pay 40 per house and 115 per hotel/tower.", "effect": { "type": "repairs", "house": 40, "hotel": 115 } },
+  { "id": "chance_rail", "deck": "chance", "title": "Catch the Nearest Rail", "text": "Advance to the nearest transport and pay double rent if owned.", "effect": { "type": "nearest", "kind": "railroad", "rentMultiplier": 2 } },
+  { "id": "chance_bonus", "deck": "chance", "title": "Streamer Donation", "text": "Collect 150.", "effect": { "type": "cash", "amount": 150 } },
+  { "id": "chaos_tax", "deck": "chaos", "title": "Group Chaos Tax", "text": "Pay every other player 25.", "effect": { "type": "payEachPlayer", "amount": 25 } },
+  { "id": "chaos_birthday", "deck": "chaos", "title": "Unhinged Birthday", "text": "Every other player pays you 50.", "effect": { "type": "collectFromEachPlayer", "amount": 50 } },
+  { "id": "chaos_bail", "deck": "chaos", "title": "Get Out of Jail-ish", "text": "Keep this card to leave jail once.", "effect": { "type": "jailPass" } },
+  { "id": "chaos_swap", "deck": "chaos", "title": "Quantum Swap", "text": "Swap positions with the richest opponent.", "effect": { "type": "swapWithRichest" } },
+  { "id": "chaos_upgrade", "deck": "chaos", "title": "Contractor Frenzy", "text": "Place one free house on a complete set you own.", "effect": { "type": "freeUpgrade" } }
+]
