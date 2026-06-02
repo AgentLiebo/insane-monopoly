@@ -10,6 +10,7 @@ Insane Monopoly is being pivoted from the initial React/Electron scaffold into a
 4. Press **Play**.
 
 See [`docs/UNITY.md`](docs/UNITY.md) for controls, data file locations, and build steps. See [`docs/UNITY_ARCHITECTURE.md`](docs/UNITY_ARCHITECTURE.md) for the 3D Monopoly engine layout.
+See [`docs/UNITY.md`](docs/UNITY.md) for controls, data file locations, and build steps.
 
 ## Legacy web scaffold
 

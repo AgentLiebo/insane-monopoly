@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace InsaneMonopoly.Runtime
@@ -35,111 +36,28 @@ namespace InsaneMonopoly.Runtime
         public int[] playerCash = Array.Empty<int>();
         public int[] playerSpaces = Array.Empty<int>();
         public int[] jailTurns = Array.Empty<int>();
-        public int[] jailCards = Array.Empty<int>();
         public bool[] bankrupt = Array.Empty<bool>();
         public PropertyLedgerEntry[] properties = Array.Empty<PropertyLedgerEntry>();
         public string[] log = Array.Empty<string>();
     }
 
-    public sealed class MonopolyRuntimeContext
-    {
-        private readonly Dictionary<string, BoardSpaceData> spacesById = new Dictionary<string, BoardSpaceData>(StringComparer.Ordinal);
-        private readonly Dictionary<string, BoardSpaceData[]> setCache = new Dictionary<string, BoardSpaceData[]>(StringComparer.Ordinal);
-        private readonly BoardSpaceData[] railroadSpaces;
-        private readonly BoardSpaceData[] utilitySpaces;
-
-        public MonopolyRuntimeContext(InsaneMonopolyCatalog catalog)
-        {
-            Catalog = catalog;
-            var railroads = new List<BoardSpaceData>();
-            var utilities = new List<BoardSpaceData>();
-            var groupedSets = new Dictionary<string, List<BoardSpaceData>>(StringComparer.Ordinal);
-
-            for (var i = 0; i < catalog.spaces.Length; i++)
-            {
-                var space = catalog.spaces[i];
-                if (!string.IsNullOrWhiteSpace(space.id))
-                {
-                    spacesById[space.id] = space;
-                }
-
-                var kind = SpaceKindParser.Parse(space.kind);
-                if (kind == SpaceKind.Railroad)
-                {
-                    railroads.Add(space);
-                }
-                else if (kind == SpaceKind.Utility)
-                {
-                    utilities.Add(space);
-                }
-
-                if (MonopolyRules.IsOwnable(space) && !string.IsNullOrWhiteSpace(space.set))
-                {
-                    if (!groupedSets.TryGetValue(space.set, out var setSpaces))
-                    {
-                        setSpaces = new List<BoardSpaceData>();
-                        groupedSets.Add(space.set, setSpaces);
-                    }
-
-                    setSpaces.Add(space);
-                }
-            }
-
-            foreach (var pair in groupedSets)
-            {
-                setCache[pair.Key] = pair.Value.ToArray();
-            }
-
-            railroadSpaces = railroads.ToArray();
-            utilitySpaces = utilities.ToArray();
-        }
-
-        public InsaneMonopolyCatalog Catalog { get; }
-        public IReadOnlyList<BoardSpaceData> RailroadSpaces => railroadSpaces;
-        public IReadOnlyList<BoardSpaceData> UtilitySpaces => utilitySpaces;
-
-        public BoardSpaceData FindSpace(string spaceId)
-        {
-            return !string.IsNullOrWhiteSpace(spaceId) && spacesById.TryGetValue(spaceId, out var space) ? space : null;
-        }
-
-        public IReadOnlyList<BoardSpaceData> GetSet(string setName)
-        {
-            if (string.IsNullOrWhiteSpace(setName))
-            {
-                return Array.Empty<BoardSpaceData>();
-            }
-
-            return setCache.TryGetValue(setName, out var spaces) ? spaces : Array.Empty<BoardSpaceData>();
-        }
-    }
-
     public sealed class PropertyLedger
     {
-        private readonly Dictionary<string, PropertyLedgerEntry> entries = new Dictionary<string, PropertyLedgerEntry>(StringComparer.Ordinal);
-        private readonly List<PropertyLedgerEntry> entryList = new List<PropertyLedgerEntry>();
+        private readonly Dictionary<string, PropertyLedgerEntry> entries = new Dictionary<string, PropertyLedgerEntry>();
 
-        public IReadOnlyList<PropertyLedgerEntry> Entries => entryList;
+        public IReadOnlyCollection<PropertyLedgerEntry> Entries => entries.Values;
 
-        public PropertyLedger(MonopolyRuntimeContext context)
+        public PropertyLedger(InsaneMonopolyCatalog catalog)
         {
-            var spaces = context.Catalog.spaces;
-            for (var i = 0; i < spaces.Length; i++)
+            foreach (var space in catalog.spaces.Where(MonopolyRules.IsOwnable))
             {
-                if (!MonopolyRules.IsOwnable(spaces[i]))
-                {
-                    continue;
-                }
-
-                var entry = new PropertyLedgerEntry { spaceId = spaces[i].id };
-                entries[spaces[i].id] = entry;
-                entryList.Add(entry);
+                entries[space.id] = new PropertyLedgerEntry { spaceId = space.id };
             }
         }
 
         public PropertyLedgerEntry Get(string spaceId)
         {
-            return !string.IsNullOrWhiteSpace(spaceId) && entries.TryGetValue(spaceId, out var entry) ? entry : null;
+            return entries.TryGetValue(spaceId, out var entry) ? entry : null;
         }
 
         public bool IsOwned(string spaceId)
@@ -148,30 +66,9 @@ namespace InsaneMonopoly.Runtime
             return entry != null && entry.ownerIndex >= 0;
         }
 
-        public void GetOwnedBy(int playerIndex, List<PropertyLedgerEntry> destination)
+        public IEnumerable<PropertyLedgerEntry> OwnedBy(int playerIndex)
         {
-            destination.Clear();
-            for (var i = 0; i < entryList.Count; i++)
-            {
-                if (entryList[i].ownerIndex == playerIndex)
-                {
-                    destination.Add(entryList[i]);
-                }
-            }
-        }
-
-        public int CountOwnedBy(int playerIndex)
-        {
-            var count = 0;
-            for (var i = 0; i < entryList.Count; i++)
-            {
-                if (entryList[i].ownerIndex == playerIndex)
-                {
-                    count += 1;
-                }
-            }
-
-            return count;
+            return entries.Values.Where(entry => entry.ownerIndex == playerIndex);
         }
 
         public void Transfer(string spaceId, int newOwner)
@@ -180,28 +77,6 @@ namespace InsaneMonopoly.Runtime
             if (entry != null)
             {
                 entry.ownerIndex = newOwner;
-            }
-        }
-
-        public void Apply(PropertyLedgerEntry[] savedEntries)
-        {
-            if (savedEntries == null)
-            {
-                return;
-            }
-
-            for (var i = 0; i < savedEntries.Length; i++)
-            {
-                var target = Get(savedEntries[i].spaceId);
-                if (target == null)
-                {
-                    continue;
-                }
-
-                target.ownerIndex = savedEntries[i].ownerIndex;
-                target.buildings = Mathf.Clamp(savedEntries[i].buildings, 0, 4);
-                target.hasHotel = savedEntries[i].hasHotel;
-                target.mortgaged = savedEntries[i].mortgaged;
             }
         }
     }
@@ -214,40 +89,18 @@ namespace InsaneMonopoly.Runtime
             return kind == SpaceKind.Property || kind == SpaceKind.Railroad || kind == SpaceKind.Utility;
         }
 
-        public static bool OwnsCompleteSet(MonopolyRuntimeContext context, PropertyLedger ledger, int ownerIndex, BoardSpaceData landedSpace)
+        public static bool OwnsCompleteSet(InsaneMonopolyCatalog catalog, PropertyLedger ledger, int ownerIndex, BoardSpaceData landedSpace)
         {
-            var setSpaces = context.GetSet(landedSpace.set);
-            if (setSpaces.Count == 0)
+            if (string.IsNullOrWhiteSpace(landedSpace.set))
             {
                 return false;
             }
 
-            for (var i = 0; i < setSpaces.Count; i++)
-            {
-                if (ledger.Get(setSpaces[i].id)?.ownerIndex != ownerIndex)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            var setSpaces = catalog.spaces.Where(space => IsOwnable(space) && space.set == landedSpace.set).ToArray();
+            return setSpaces.Length > 0 && setSpaces.All(space => ledger.Get(space.id)?.ownerIndex == ownerIndex);
         }
 
-        public static int CountOwnedInGroup(IReadOnlyList<BoardSpaceData> group, PropertyLedger ledger, int ownerIndex)
-        {
-            var count = 0;
-            for (var i = 0; i < group.Count; i++)
-            {
-                if (ledger.Get(group[i].id)?.ownerIndex == ownerIndex)
-                {
-                    count += 1;
-                }
-            }
-
-            return count;
-        }
-
-        public static int CalculateRent(MonopolyRuntimeContext context, PropertyLedger ledger, BoardSpaceData space, int diceTotal)
+        public static int CalculateRent(InsaneMonopolyCatalog catalog, PropertyLedger ledger, BoardSpaceData space, int diceTotal)
         {
             var entry = ledger.Get(space.id);
             if (entry == null || entry.ownerIndex < 0 || entry.mortgaged)
@@ -258,13 +111,13 @@ namespace InsaneMonopoly.Runtime
             var kind = SpaceKindParser.Parse(space.kind);
             if (kind == SpaceKind.Railroad)
             {
-                var ownedRails = CountOwnedInGroup(context.RailroadSpaces, ledger, entry.ownerIndex);
-                return Math.Max(space.rent, 25) * (1 << Mathf.Max(0, ownedRails - 1));
+                var ownedRails = catalog.spaces.Count(candidate => SpaceKindParser.Parse(candidate.kind) == SpaceKind.Railroad && ledger.Get(candidate.id)?.ownerIndex == entry.ownerIndex);
+                return Math.Max(space.rent, 25) * (int)Mathf.Pow(2, Mathf.Max(0, ownedRails - 1));
             }
 
             if (kind == SpaceKind.Utility)
             {
-                var ownedUtilities = CountOwnedInGroup(context.UtilitySpaces, ledger, entry.ownerIndex);
+                var ownedUtilities = catalog.spaces.Count(candidate => SpaceKindParser.Parse(candidate.kind) == SpaceKind.Utility && ledger.Get(candidate.id)?.ownerIndex == entry.ownerIndex);
                 return diceTotal * (ownedUtilities >= 2 ? 10 : 4);
             }
 
@@ -279,18 +132,18 @@ namespace InsaneMonopoly.Runtime
             }
 
             var baseRent = Math.Max(0, space.rent);
-            return OwnsCompleteSet(context, ledger, entry.ownerIndex, space) ? baseRent * 2 : baseRent;
+            return OwnsCompleteSet(catalog, ledger, entry.ownerIndex, space) ? baseRent * 2 : baseRent;
         }
     }
 
     public sealed class EconomySystem
     {
-        private readonly MonopolyRuntimeContext context;
+        private readonly InsaneMonopolyCatalog catalog;
         private readonly PropertyLedger ledger;
 
-        public EconomySystem(MonopolyRuntimeContext context, PropertyLedger ledger)
+        public EconomySystem(InsaneMonopolyCatalog catalog, PropertyLedger ledger)
         {
-            this.context = context;
+            this.catalog = catalog;
             this.ledger = ledger;
         }
 
@@ -311,7 +164,7 @@ namespace InsaneMonopoly.Runtime
 
             if (buyer.Cash < space.price)
             {
-                message = $"{buyer.PlayerName} cannot afford {space.name}.";
+                message = $"{buyer.PlayerName} cannot afford {space.name}. Auction should start here.";
                 return false;
             }
 
@@ -323,7 +176,7 @@ namespace InsaneMonopoly.Runtime
 
         public int PayRent(PlayerPawn visitor, PlayerPawn owner, BoardSpaceData space, int diceTotal)
         {
-            var rent = MonopolyRules.CalculateRent(context, ledger, space, diceTotal);
+            var rent = MonopolyRules.CalculateRent(catalog, ledger, space, diceTotal);
             if (rent <= 0)
             {
                 return 0;
@@ -350,70 +203,14 @@ namespace InsaneMonopoly.Runtime
         }
     }
 
-    public sealed class AuctionSystem
-    {
-        private readonly PropertyLedger ledger;
-
-        public AuctionSystem(PropertyLedger ledger)
-        {
-            this.ledger = ledger;
-        }
-
-        public bool RunBankAuction(BoardSpaceData space, IReadOnlyList<PlayerPawn> players, int cashReserve, out string message)
-        {
-            var entry = ledger.Get(space.id);
-            if (entry == null || entry.ownerIndex >= 0)
-            {
-                message = $"Auction skipped for {space.name}.";
-                return false;
-            }
-
-            PlayerPawn winner = null;
-            var winningBid = 0;
-            var minimumBid = Math.Max(10, space.price / 2);
-            for (var i = 0; i < players.Count; i++)
-            {
-                var player = players[i];
-                if (player.IsBankrupt)
-                {
-                    continue;
-                }
-
-                var available = player.Cash - cashReserve;
-                if (available < minimumBid)
-                {
-                    continue;
-                }
-
-                var bid = Mathf.Clamp(space.price * (65 + (player.PlayerIndex * 9 % 30)) / 100, minimumBid, available);
-                if (bid > winningBid)
-                {
-                    winner = player;
-                    winningBid = bid;
-                }
-            }
-
-            if (winner == null)
-            {
-                message = $"No one can afford the opening bid for {space.name}.";
-                return false;
-            }
-
-            winner.SetCash(winner.Cash - winningBid);
-            entry.ownerIndex = winner.PlayerIndex;
-            message = $"Auction: {winner.PlayerName} wins {space.name} for ${winningBid}.";
-            return true;
-        }
-    }
-
     public sealed class BuildingSystem
     {
-        private readonly MonopolyRuntimeContext context;
+        private readonly InsaneMonopolyCatalog catalog;
         private readonly PropertyLedger ledger;
 
-        public BuildingSystem(MonopolyRuntimeContext context, PropertyLedger ledger)
+        public BuildingSystem(InsaneMonopolyCatalog catalog, PropertyLedger ledger)
         {
-            this.context = context;
+            this.catalog = catalog;
             this.ledger = ledger;
         }
 
@@ -426,20 +223,14 @@ namespace InsaneMonopoly.Runtime
                 return false;
             }
 
-            if (entry.mortgaged)
-            {
-                message = $"{space.name} is mortgaged and cannot be improved.";
-                return false;
-            }
-
-            if (!MonopolyRules.OwnsCompleteSet(context, ledger, owner.PlayerIndex, space))
+            if (!MonopolyRules.OwnsCompleteSet(catalog, ledger, owner.PlayerIndex, space))
             {
                 message = $"{owner.PlayerName} needs the full {space.set} set before building.";
                 return false;
             }
 
             var buildCost = space.HouseCost;
-            if (owner.Cash < buildCost + context.Catalog.rules.cashReserve)
+            if (owner.Cash < buildCost + catalog.rules.cashReserve)
             {
                 message = $"{owner.PlayerName} keeps cash instead of building on {space.name}.";
                 return false;
@@ -464,31 +255,6 @@ namespace InsaneMonopoly.Runtime
                 message = $"{owner.PlayerName} builds house {entry.buildings} on {space.name}.";
             }
 
-            return true;
-        }
-
-        public bool TrySellImprovement(PlayerPawn owner, BoardSpaceData space, out string message)
-        {
-            var entry = ledger.Get(space.id);
-            if (entry == null || entry.ownerIndex != owner.PlayerIndex || (!entry.hasHotel && entry.buildings <= 0))
-            {
-                message = $"{space.name} has no sellable improvements.";
-                return false;
-            }
-
-            var refund = Math.Max(1, space.HouseCost / 2);
-            if (entry.hasHotel)
-            {
-                entry.hasHotel = false;
-                entry.buildings = 4;
-                owner.SetCash(owner.Cash + refund);
-                message = $"{owner.PlayerName} sells the hotel on {space.name} for ${refund}.";
-                return true;
-            }
-
-            entry.buildings -= 1;
-            owner.SetCash(owner.Cash + refund);
-            message = $"{owner.PlayerName} sells a house on {space.name} for ${refund}.";
             return true;
         }
     }
@@ -550,22 +316,16 @@ namespace InsaneMonopoly.Runtime
 
         public bool Execute(TradeOffer offer, IReadOnlyList<PlayerPawn> players, out string message)
         {
-            if (offer.fromPlayer < 0 || offer.fromPlayer >= players.Count || offer.toPlayer < 0 || offer.toPlayer >= players.Count)
-            {
-                message = "Trade rejected: invalid player.";
-                return false;
-            }
-
             var from = players[offer.fromPlayer];
             var to = players[offer.toPlayer];
-            if (from.Cash < offer.cashFromPlayer || to.Cash < offer.cashToPlayer ||
-                from.GetOutOfJailCards < offer.jailCardsFromPlayer || to.GetOutOfJailCards < offer.jailCardsToPlayer)
+            if (from.Cash < offer.cashFromPlayer || to.Cash < offer.cashToPlayer)
             {
-                message = "Trade rejected: not enough cash or cards.";
+                message = "Trade rejected: not enough cash.";
                 return false;
             }
 
-            if (!ValidateTradeProperties(offer.propertiesFromPlayer, from.PlayerIndex) || !ValidateTradeProperties(offer.propertiesToPlayer, to.PlayerIndex))
+            if (offer.propertiesFromPlayer.Any(spaceId => ledger.Get(spaceId)?.ownerIndex != from.PlayerIndex) ||
+                offer.propertiesToPlayer.Any(spaceId => ledger.Get(spaceId)?.ownerIndex != to.PlayerIndex))
             {
                 message = "Trade rejected: property ownership changed.";
                 return false;
@@ -573,14 +333,14 @@ namespace InsaneMonopoly.Runtime
 
             from.SetCash(from.Cash - offer.cashFromPlayer + offer.cashToPlayer);
             to.SetCash(to.Cash - offer.cashToPlayer + offer.cashFromPlayer);
-            for (var i = 0; i < offer.propertiesFromPlayer.Length; i++)
+            foreach (var spaceId in offer.propertiesFromPlayer)
             {
-                ledger.Transfer(offer.propertiesFromPlayer[i], to.PlayerIndex);
+                ledger.Transfer(spaceId, to.PlayerIndex);
             }
 
-            for (var i = 0; i < offer.propertiesToPlayer.Length; i++)
+            foreach (var spaceId in offer.propertiesToPlayer)
             {
-                ledger.Transfer(offer.propertiesToPlayer[i], from.PlayerIndex);
+                ledger.Transfer(spaceId, from.PlayerIndex);
             }
 
             from.SetGetOutOfJailCards(from.GetOutOfJailCards - offer.jailCardsFromPlayer + offer.jailCardsToPlayer);
@@ -588,40 +348,19 @@ namespace InsaneMonopoly.Runtime
             message = $"{from.PlayerName} and {to.PlayerName} complete a cash/property/card trade.";
             return true;
         }
-
-        private bool ValidateTradeProperties(string[] spaceIds, int ownerIndex)
-        {
-            if (spaceIds == null)
-            {
-                return true;
-            }
-
-            for (var i = 0; i < spaceIds.Length; i++)
-            {
-                if (ledger.Get(spaceIds[i])?.ownerIndex != ownerIndex)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
     }
 
     public sealed class BankruptcySystem
     {
-        private readonly MonopolyRuntimeContext context;
+        private readonly InsaneMonopolyCatalog catalog;
         private readonly PropertyLedger ledger;
         private readonly EconomySystem economy;
-        private readonly BuildingSystem building;
-        private readonly List<PropertyLedgerEntry> ownedBuffer = new List<PropertyLedgerEntry>();
 
-        public BankruptcySystem(MonopolyRuntimeContext context, PropertyLedger ledger, EconomySystem economy, BuildingSystem building)
+        public BankruptcySystem(InsaneMonopolyCatalog catalog, PropertyLedger ledger, EconomySystem economy)
         {
-            this.context = context;
+            this.catalog = catalog;
             this.ledger = ledger;
             this.economy = economy;
-            this.building = building;
         }
 
         public bool TryAvoidBankruptcy(PlayerPawn player, out string message)
@@ -632,40 +371,21 @@ namespace InsaneMonopoly.Runtime
                 return true;
             }
 
-            ledger.GetOwnedBy(player.PlayerIndex, ownedBuffer);
-            for (var i = 0; i < ownedBuffer.Count && player.Cash < 0; i++)
+            foreach (var owned in ledger.OwnedBy(player.PlayerIndex).ToArray())
             {
-                var space = context.FindSpace(ownedBuffer[i].spaceId);
-                if (space != null)
+                var space = catalog.FindSpace(owned.spaceId);
+                if (space != null && economy.Mortgage(player, space, out message) && player.Cash >= 0)
                 {
-                    while (player.Cash < 0 && building.TrySellImprovement(player, space, out message))
-                    {
-                        // Keep selling until the debt is handled or improvements are gone.
-                    }
+                    return true;
                 }
             }
 
-            for (var i = 0; i < ownedBuffer.Count && player.Cash < 0; i++)
+            foreach (var owned in ledger.OwnedBy(player.PlayerIndex))
             {
-                var space = context.FindSpace(ownedBuffer[i].spaceId);
-                if (space != null)
-                {
-                    economy.Mortgage(player, space, out message);
-                }
-            }
-
-            if (player.Cash >= 0)
-            {
-                message = $"{player.PlayerName} liquidates assets and stays alive with ${player.Cash}.";
-                return true;
-            }
-
-            for (var i = 0; i < ownedBuffer.Count; i++)
-            {
-                ownedBuffer[i].ownerIndex = -1;
-                ownedBuffer[i].buildings = 0;
-                ownedBuffer[i].hasHotel = false;
-                ownedBuffer[i].mortgaged = false;
+                owned.ownerIndex = -1;
+                owned.buildings = 0;
+                owned.hasHotel = false;
+                owned.mortgaged = false;
             }
 
             player.SetBankrupt(true);
@@ -676,12 +396,12 @@ namespace InsaneMonopoly.Runtime
 
     public sealed class MonopolyAiSystem
     {
-        private readonly MonopolyRuntimeContext context;
+        private readonly InsaneMonopolyCatalog catalog;
         private readonly PropertyLedger ledger;
 
-        public MonopolyAiSystem(MonopolyRuntimeContext context, PropertyLedger ledger)
+        public MonopolyAiSystem(InsaneMonopolyCatalog catalog, PropertyLedger ledger)
         {
-            this.context = context;
+            this.catalog = catalog;
             this.ledger = ledger;
         }
 
@@ -692,39 +412,19 @@ namespace InsaneMonopoly.Runtime
                 return false;
             }
 
-            var ownedInSet = MonopolyRules.CountOwnedInGroup(context.GetSet(space.set), ledger, player.PlayerIndex);
-            var score = space.rent * 8 + ownedInSet * 90 + (SpaceKindParser.Parse(space.kind) == SpaceKind.Railroad ? 120 : 0);
-            return player.Cash - space.price >= context.Catalog.rules.cashReserve && score >= space.price;
+            var setPressure = catalog.spaces.Count(candidate => candidate.set == space.set && ledger.Get(candidate.id)?.ownerIndex == player.PlayerIndex);
+            var score = space.rent * 8 + setPressure * 90 + (SpaceKindParser.Parse(space.kind) == SpaceKind.Railroad ? 120 : 0);
+            return player.Cash - space.price >= catalog.rules.cashReserve && score >= space.price;
         }
 
         public BoardSpaceData ChooseBuildTarget(PlayerPawn player)
         {
-            BoardSpaceData best = null;
-            var bestScore = int.MinValue;
-            var spaces = context.Catalog.spaces;
-            for (var i = 0; i < spaces.Length; i++)
-            {
-                var space = spaces[i];
-                var entry = ledger.Get(space.id);
-                if (entry == null || entry.ownerIndex != player.PlayerIndex || entry.hasHotel || SpaceKindParser.Parse(space.kind) != SpaceKind.Property)
-                {
-                    continue;
-                }
-
-                if (!MonopolyRules.OwnsCompleteSet(context, ledger, player.PlayerIndex, space))
-                {
-                    continue;
-                }
-
-                var score = space.hotelRent + space.rent - entry.buildings * 20;
-                if (score > bestScore)
-                {
-                    bestScore = score;
-                    best = space;
-                }
-            }
-
-            return best;
+            return catalog.spaces
+                .Where(space => SpaceKindParser.Parse(space.kind) == SpaceKind.Property)
+                .Where(space => MonopolyRules.OwnsCompleteSet(catalog, ledger, player.PlayerIndex, space))
+                .Where(space => ledger.Get(space.id)?.hasHotel == false)
+                .OrderByDescending(space => space.hotelRent + space.rent)
+                .FirstOrDefault();
         }
     }
 
@@ -736,48 +436,14 @@ namespace InsaneMonopoly.Runtime
             {
                 currentPlayerIndex = currentPlayerIndex,
                 freeParkingPot = freeParkingPot,
-                playerCash = new int[players.Count],
-                playerSpaces = new int[players.Count],
-                jailTurns = new int[players.Count],
-                jailCards = new int[players.Count],
-                bankrupt = new bool[players.Count],
-                properties = new PropertyLedgerEntry[ledger.Entries.Count],
-                log = new string[log.Count]
+                playerCash = players.Select(player => player.Cash).ToArray(),
+                playerSpaces = players.Select(player => player.SpaceIndex).ToArray(),
+                jailTurns = players.Select(player => player.JailTurns).ToArray(),
+                bankrupt = players.Select(player => player.IsBankrupt).ToArray(),
+                properties = ledger.Entries.ToArray(),
+                log = log.ToArray()
             };
-
-            for (var i = 0; i < players.Count; i++)
-            {
-                state.playerCash[i] = players[i].Cash;
-                state.playerSpaces[i] = players[i].SpaceIndex;
-                state.jailTurns[i] = players[i].JailTurns;
-                state.jailCards[i] = players[i].GetOutOfJailCards;
-                state.bankrupt[i] = players[i].IsBankrupt;
-            }
-
-            for (var i = 0; i < ledger.Entries.Count; i++)
-            {
-                var entry = ledger.Entries[i];
-                state.properties[i] = new PropertyLedgerEntry
-                {
-                    spaceId = entry.spaceId,
-                    ownerIndex = entry.ownerIndex,
-                    buildings = entry.buildings,
-                    hasHotel = entry.hasHotel,
-                    mortgaged = entry.mortgaged
-                };
-            }
-
-            for (var i = 0; i < log.Count; i++)
-            {
-                state.log[i] = log[i];
-            }
-
             return JsonUtility.ToJson(state, true);
-        }
-
-        public MonopolySaveState Deserialize(string json)
-        {
-            return string.IsNullOrWhiteSpace(json) ? null : JsonUtility.FromJson<MonopolySaveState>(json);
         }
     }
 }
