@@ -1,0 +1,59 @@
+{
+  "name": "insane-monopoly",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Standalone desktop and web implementation scaffold for Insane Monopoly.",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "dev:server": "tsx server/src/index.ts",
+    "build": "tsc -p tsconfig.json && vite build",
+    "test": "tsc -p tsconfig.json --noEmit",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron electron/main.cjs\"",
+    "electron:package": "npm run build && electron-builder",
+    "lint": "eslint . --ext .ts,.tsx"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "better-sqlite3": "latest",
+    "cors": "latest",
+    "express": "latest",
+    "pg": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "socket.io": "latest",
+    "socket.io-client": "latest",
+    "vite": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@types/cors": "latest",
+    "@types/express": "latest",
+    "@types/node": "latest",
+    "@types/pg": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "concurrently": "latest",
+    "electron": "latest",
+    "electron-builder": "latest",
+    "eslint": "latest",
+    "tsx": "latest",
+    "typescript": "latest",
+    "vitest": "latest",
+    "wait-on": "latest"
+  },
+  "build": {
+    "appId": "com.insanemonopoly.app",
+    "productName": "Insane Monopoly",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "server/**/*",
+      "data/**/*",
+      "package.json"
+    ]
+  }
+}

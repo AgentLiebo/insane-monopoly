@@ -1,0 +1,12 @@
+services:
+  insane-monopoly:
+    build: .
+    ports:
+      - "3000:3000"
+      - "5173:5173"
+    environment:
+      SQLITE_FILE: /data/insane-monopoly.sqlite
+    volumes:
+      - insane-monopoly-data:/data
+volumes:
+  insane-monopoly-data:
