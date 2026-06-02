@@ -1,0 +1,23 @@
+[
+  { "id": "crash_course", "name": "Crash Course", "set": "Tutorial Terror", "kind": "street", "price": 80, "mortgage": 40, "upgradeCost": 50, "rent": [6, 30, 90, 270, 400, 550] },
+  { "id": "meme_avenue", "name": "Meme Avenue", "set": "Tutorial Terror", "kind": "street", "price": 100, "mortgage": 50, "upgradeCost": 50, "rent": [8, 40, 100, 300, 450, 600] },
+  { "id": "rocket_rail", "name": "Rocket Rail", "set": "Transports", "kind": "railroad", "price": 200, "mortgage": 100, "rent": [25, 50, 100, 200] },
+  { "id": "glitch_garden", "name": "Glitch Garden", "set": "Glitch District", "kind": "street", "price": 140, "mortgage": 70, "upgradeCost": 100, "rent": [10, 50, 150, 450, 625, 750] },
+  { "id": "neon_noodle", "name": "Neon Noodle Stand", "set": "Glitch District", "kind": "street", "price": 160, "mortgage": 80, "upgradeCost": 100, "rent": [12, 60, 180, 500, 700, 900] },
+  { "id": "crypto_casino", "name": "Crypto Casino", "set": "Risk Row", "kind": "street", "price": 180, "mortgage": 90, "upgradeCost": 100, "rent": [14, 70, 200, 550, 750, 950] },
+  { "id": "ai_utility_grid", "name": "AI Utility Grid", "set": "Utilities", "kind": "utility", "price": 150, "mortgage": 75, "multipliers": [4, 10] },
+  { "id": "doom_diner", "name": "Doom Diner", "set": "Risk Row", "kind": "street", "price": 200, "mortgage": 100, "upgradeCost": 100, "rent": [16, 80, 220, 600, 800, 1000] },
+  { "id": "surreal_subway", "name": "Surreal Subway", "set": "Transports", "kind": "railroad", "price": 200, "mortgage": 100, "rent": [25, 50, 100, 200] },
+  { "id": "gravity_gym", "name": "Gravity Gym", "set": "Physics Park", "kind": "street", "price": 220, "mortgage": 110, "upgradeCost": 150, "rent": [18, 90, 250, 700, 875, 1050] },
+  { "id": "laser_lane", "name": "Laser Lane", "set": "Physics Park", "kind": "street", "price": 240, "mortgage": 120, "upgradeCost": 150, "rent": [20, 100, 300, 750, 925, 1100] },
+  { "id": "moon_market", "name": "Moon Market", "set": "Lunar Luxury", "kind": "street", "price": 260, "mortgage": 130, "upgradeCost": 150, "rent": [22, 110, 330, 800, 975, 1150] },
+  { "id": "mutant_mall", "name": "Mutant Mall", "set": "Lunar Luxury", "kind": "street", "price": 280, "mortgage": 140, "upgradeCost": 150, "rent": [24, 120, 360, 850, 1025, 1200] },
+  { "id": "quantum_quay", "name": "Quantum Quay", "set": "Lunar Luxury", "kind": "street", "price": 300, "mortgage": 150, "upgradeCost": 200, "rent": [26, 130, 390, 900, 1100, 1275] },
+  { "id": "hyperloop_hijinks", "name": "Hyperloop Hijinks", "set": "Transports", "kind": "railroad", "price": 200, "mortgage": 100, "rent": [25, 50, 100, 200] },
+  { "id": "volcano_villa", "name": "Volcano Villa", "set": "Apocalypse Alley", "kind": "street", "price": 320, "mortgage": 160, "upgradeCost": 200, "rent": [28, 150, 450, 1000, 1200, 1400] },
+  { "id": "meme_power_plant", "name": "Meme Power Plant", "set": "Utilities", "kind": "utility", "price": 150, "mortgage": 75, "multipliers": [4, 10] },
+  { "id": "dragon_drive", "name": "Dragon Drive", "set": "Apocalypse Alley", "kind": "street", "price": 350, "mortgage": 175, "upgradeCost": 200, "rent": [35, 175, 500, 1100, 1300, 1500] },
+  { "id": "final_railgun", "name": "Final Railgun", "set": "Transports", "kind": "railroad", "price": 200, "mortgage": 100, "rent": [25, 50, 100, 200] },
+  { "id": "eldritch_estate", "name": "Eldritch Estate", "set": "Cosmic Endgame", "kind": "street", "price": 400, "mortgage": 200, "upgradeCost": 250, "rent": [50, 200, 600, 1400, 1700, 2000] },
+  { "id": "void_vault", "name": "Void Vault", "set": "Cosmic Endgame", "kind": "street", "price": 450, "mortgage": 225, "upgradeCost": 250, "rent": [65, 250, 750, 1600, 1900, 2300] }
+]
