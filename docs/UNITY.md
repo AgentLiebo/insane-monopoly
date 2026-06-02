@@ -1,11 +1,11 @@
 # Unity Version
 
-This repo now includes a Unity implementation in `Unity/` aimed at a standalone offline Windows Monopoly-style video game rather than a web app or tabletop sandbox.
+This repo now includes a Unity implementation in `Unity/` aimed at a real 3D tabletop game instead of the earlier flat web prototype.
 
 ## Requirements
 
 - Unity `2022.3.50f1` or another Unity 2022.3 LTS editor.
-- Windows desktop build module if you want the local `.exe` deliverable.
+- Desktop target modules for Windows, macOS, or Linux if you want packaged builds.
 
 ## Run in the Editor
 
@@ -17,12 +17,12 @@ This repo now includes a Unity implementation in `Unity/` aimed at a standalone 
 
 The scene contains a single bootstrap object. At runtime it procedurally creates:
 
-- A cleaner 3D Monopoly-style board with 40 spaces.
-- A table/felt presentation layer, wood rails, raised property tiles, a center platform, card deck stacks, and corner monuments.
+- A neon 3D Monopoly-style board with 40 spaces.
+- Raised glowing property tiles and a center platform.
 - Animated dice cubes.
 - 2–8 player pawns with lights.
 - Orbit/zoom camera controls.
-- A temporary HUD with player cash, dice, Free Parking pot, controls, and event log while production UI is built.
+- A prototype HUD with player cash, dice, Free Parking pot, and event log.
 
 ## Controls
 
@@ -40,25 +40,20 @@ Unity/Assets/StreamingAssets/insane-monopoly-config.json
 
 Edit that JSON to change board spaces, rents, prices, card decks, tax amounts, and basic rules without touching C# code.
 
-## Build Windows EXE
+## Build
 
-From Unity Editor, use the included menu command:
+From Unity Editor:
 
-```text
-Insane Monopoly > Build Windows EXE
-```
+1. Open **File > Build Settings**.
+2. Confirm `Assets/Scenes/Main.unity` is in the scene list.
+3. Pick your target platform.
+4. Click **Build**.
 
-It writes the executable to:
-
-```text
-Unity/Builds/Windows/InsaneMonopoly.exe
-```
-
-You can also use **File > Build Settings** manually. The included `ProjectSettings/EditorBuildSettings.asset` already registers the main scene.
+The included `ProjectSettings/EditorBuildSettings.asset` already registers the main scene.
 
 ## What is implemented now
 
-- Procedural 3D board/table generation with rails, deck stacks, corner monuments, and readable labels.
+- Procedural 3D board generation.
 - Runtime JSON loading through StreamingAssets.
 - Neon material generation and tile labels.
 - Animated dice roll presentation.
@@ -67,12 +62,14 @@ You can also use **File > Build Settings** manually. The included `ProjectSettin
 - Property ownership, rent payment, railroad/utility rent scaling, mortgages, and bankruptcy checks.
 - Full-set building rules with visible house and hotel markers.
 - Jail payment/cards/doubles handling, sample trading, AI buy/build heuristics, and save JSON export.
-- Temporary IMGUI HUD for fast iteration; production UI should move to UI Toolkit or uGUI.
+- Legacy IMGUI HUD for fast iteration.
 
 ## Next Unity milestones
 
 - Replace primitive placeholders with modeled miniatures and VFX.
 - Replace sample trade/export controls with production UI Toolkit panels.
 - Add auctions, deed inspection, and manual mortgage/sell-house screens.
+- Add ownership deeds, rent enforcement, auctions, mortgages, trades, and bankruptcy UI.
+- Add Photon/Netcode multiplayer once the tabletop feel is locked.
 - Replace IMGUI with UI Toolkit or uGUI panels.
 - Add sound, music, post-processing, and cinematic camera beats.

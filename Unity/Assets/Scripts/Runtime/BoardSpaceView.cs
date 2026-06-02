@@ -4,21 +4,12 @@ namespace InsaneMonopoly.Runtime
 {
     public sealed class BoardSpaceView : MonoBehaviour
     {
-        private static Material houseMaterial;
-        private static Material hotelMaterial;
-
         [SerializeField] private Renderer tileRenderer;
         [SerializeField] private TextMesh titleLabel;
         [SerializeField] private TextMesh priceLabel;
         [SerializeField] private Light accentLight;
-
         private GameObject ownerMarker;
-        private Renderer ownerMarkerRenderer;
-        private Material ownerMarkerMaterial;
         private readonly GameObject[] buildingMarkers = new GameObject[5];
-        private int currentOwnerIndex = int.MinValue;
-        private int currentHouses = -1;
-        private bool currentHotel;
 
         public int Index { get; private set; }
         public BoardSpaceData Data { get; private set; } = new BoardSpaceData();
@@ -57,62 +48,54 @@ namespace InsaneMonopoly.Runtime
             accentLight.color = material.color;
         }
 
+
         public void SetOwner(int ownerIndex, Color ownerColor)
         {
-            if (currentOwnerIndex == ownerIndex)
+            if (ownerMarker == null)
             {
-                return;
+                ownerMarker = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                ownerMarker.name = "Owner Marker";
+                ownerMarker.transform.SetParent(transform, false);
+                ownerMarker.transform.localPosition = new Vector3(0f, 0.72f, 0f);
+                ownerMarker.transform.localScale = new Vector3(0.85f, 0.04f, 0.85f);
+                Destroy(ownerMarker.GetComponent<Collider>());
             }
 
-            if (ownerIndex < 0 && ownerMarker == null)
-            {
-                currentOwnerIndex = ownerIndex;
-                return;
-            }
-
-            EnsureOwnerMarker();
-            currentOwnerIndex = ownerIndex;
             ownerMarker.SetActive(ownerIndex >= 0);
-            if (ownerIndex < 0)
+            if (ownerIndex >= 0)
             {
-                return;
+                var material = new Material(Shader.Find("Standard"));
+                material.color = ownerColor;
+                material.EnableKeyword("_EMISSION");
+                material.SetColor("_EmissionColor", ownerColor * 1.2f);
+                ownerMarker.GetComponent<Renderer>().sharedMaterial = material;
             }
-
-            if (ownerMarkerMaterial == null)
-            {
-                ownerMarkerMaterial = new Material(Shader.Find("Standard"));
-                ownerMarkerMaterial.name = $"Owner Marker {Index:00}";
-                ownerMarkerMaterial.EnableKeyword("_EMISSION");
-                ownerMarkerRenderer.sharedMaterial = ownerMarkerMaterial;
-            }
-
-            ownerMarkerMaterial.color = ownerColor;
-            ownerMarkerMaterial.SetColor("_EmissionColor", ownerColor * 1.2f);
         }
 
         public void SetBuildings(int houses, bool hotel)
         {
-            houses = Mathf.Clamp(houses, 0, 4);
-            if (currentHouses == houses && currentHotel == hotel)
-            {
-                return;
-            }
-
-            if (houses == 0 && !hotel && currentHouses <= 0 && !currentHotel)
-            {
-                currentHouses = 0;
-                currentHotel = false;
-                return;
-            }
-
-            currentHouses = houses;
-            currentHotel = hotel;
-            EnsureBuildingMaterials();
             for (var i = 0; i < buildingMarkers.Length; i++)
             {
-                EnsureBuildingMarker(i);
+                if (buildingMarkers[i] == null)
+                {
+                    buildingMarkers[i] = GameObject.CreatePrimitive(i == 4 ? PrimitiveType.Cylinder : PrimitiveType.Cube);
+                    buildingMarkers[i].name = i == 4 ? "Hotel Marker" : $"House Marker {i + 1}";
+                    buildingMarkers[i].transform.SetParent(transform, false);
+                    Destroy(buildingMarkers[i].GetComponent<Collider>());
+                }
+
                 var active = hotel ? i == 4 : i < houses;
                 buildingMarkers[i].SetActive(active);
+                if (active)
+                {
+                    buildingMarkers[i].transform.localPosition = new Vector3(-0.54f + i * 0.27f, 0.82f, 0.58f);
+                    buildingMarkers[i].transform.localScale = i == 4 ? new Vector3(0.34f, 0.22f, 0.34f) : new Vector3(0.2f, 0.2f, 0.2f);
+                    var material = new Material(Shader.Find("Standard"));
+                    material.color = i == 4 ? new Color(1f, 0.85f, 0.1f) : new Color(0.1f, 1f, 0.35f);
+                    material.EnableKeyword("_EMISSION");
+                    material.SetColor("_EmissionColor", material.color * 0.9f);
+                    buildingMarkers[i].GetComponent<Renderer>().sharedMaterial = material;
+                }
             }
         }
 
@@ -123,61 +106,6 @@ namespace InsaneMonopoly.Runtime
             {
                 accentLight.intensity = highlighted ? 2.4f : 0.35f;
             }
-        }
-
-        private void EnsureOwnerMarker()
-        {
-            if (ownerMarker != null)
-            {
-                return;
-            }
-
-            ownerMarker = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            ownerMarker.name = "Owner Marker";
-            ownerMarker.transform.SetParent(transform, false);
-            ownerMarker.transform.localPosition = new Vector3(0f, 0.72f, 0f);
-            ownerMarker.transform.localScale = new Vector3(0.85f, 0.04f, 0.85f);
-            ownerMarkerRenderer = ownerMarker.GetComponent<Renderer>();
-            Destroy(ownerMarker.GetComponent<Collider>());
-        }
-
-        private void EnsureBuildingMarker(int index)
-        {
-            if (buildingMarkers[index] != null)
-            {
-                return;
-            }
-
-            buildingMarkers[index] = GameObject.CreatePrimitive(index == 4 ? PrimitiveType.Cylinder : PrimitiveType.Cube);
-            buildingMarkers[index].name = index == 4 ? "Hotel Marker" : $"House Marker {index + 1}";
-            buildingMarkers[index].transform.SetParent(transform, false);
-            buildingMarkers[index].transform.localPosition = new Vector3(-0.54f + index * 0.27f, 0.82f, 0.58f);
-            buildingMarkers[index].transform.localScale = index == 4 ? new Vector3(0.34f, 0.22f, 0.34f) : new Vector3(0.2f, 0.2f, 0.2f);
-            buildingMarkers[index].GetComponent<Renderer>().sharedMaterial = index == 4 ? hotelMaterial : houseMaterial;
-            Destroy(buildingMarkers[index].GetComponent<Collider>());
-        }
-
-        private static void EnsureBuildingMaterials()
-        {
-            if (houseMaterial == null)
-            {
-                houseMaterial = CreateSharedMarkerMaterial("House Marker", new Color(0.1f, 1f, 0.35f));
-            }
-
-            if (hotelMaterial == null)
-            {
-                hotelMaterial = CreateSharedMarkerMaterial("Hotel Marker", new Color(1f, 0.85f, 0.1f));
-            }
-        }
-
-        private static Material CreateSharedMarkerMaterial(string materialName, Color color)
-        {
-            var material = new Material(Shader.Find("Standard"));
-            material.name = materialName;
-            material.color = color;
-            material.EnableKeyword("_EMISSION");
-            material.SetColor("_EmissionColor", color * 0.9f);
-            return material;
         }
 
         private TextMesh CreateLabel(string labelName, string text, float size, Vector3 localPosition)

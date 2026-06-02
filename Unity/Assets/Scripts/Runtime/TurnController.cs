@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace InsaneMonopoly.Runtime
@@ -20,13 +21,11 @@ namespace InsaneMonopoly.Runtime
         };
 
         private InsaneMonopolyCatalog catalog = new InsaneMonopolyCatalog();
-        private MonopolyRuntimeContext runtimeContext;
         private PropertyLedger ledger;
         private EconomySystem economy;
         private BuildingSystem building;
         private JailSystem jail;
         private TradingSystem trading;
-        private AuctionSystem auction;
         private BankruptcySystem bankruptcy;
         private MonopolyAiSystem ai;
         private SaveSystem saveSystem;
@@ -40,7 +39,7 @@ namespace InsaneMonopoly.Runtime
         public int FreeParkingPot => freeParkingPot;
         public bool TurnInProgress => turnInProgress;
         public string LastDiceText => diceRoller == null ? "--" : $"{diceRoller.LastDieA} + {diceRoller.LastDieB}";
-        public int ActivePlayerCount => CountActivePlayers();
+        public int ActivePlayerCount => players.Count(player => !player.IsBankrupt);
         public PropertyLedger Ledger => ledger;
 
         public void Initialize(InsaneMonopolyCatalog loadedCatalog, Board3DBuilder builtBoard, DiceRoller roller)
@@ -48,24 +47,25 @@ namespace InsaneMonopoly.Runtime
             catalog = loadedCatalog;
             board = builtBoard;
             diceRoller = roller;
-            runtimeContext = new MonopolyRuntimeContext(catalog);
-            ledger = new PropertyLedger(runtimeContext);
-            economy = new EconomySystem(runtimeContext, ledger);
-            building = new BuildingSystem(runtimeContext, ledger);
+
+            ledger = new PropertyLedger(catalog);
+            economy = new EconomySystem(catalog, ledger);
+            building = new BuildingSystem(catalog, ledger);
             jail = new JailSystem(catalog.rules);
             trading = new TradingSystem(ledger);
-            auction = new AuctionSystem(ledger);
-            bankruptcy = new BankruptcySystem(runtimeContext, ledger, economy, building);
-            ai = new MonopolyAiSystem(runtimeContext, ledger);
+            bankruptcy = new BankruptcySystem(catalog, ledger, economy);
+            ai = new MonopolyAiSystem(catalog, ledger);
             saveSystem = new SaveSystem();
+
             SpawnPlayers(Mathf.Clamp(humanPlayers, catalog.rules.minPlayers, catalog.rules.maxPlayers));
             SyncBoardOwnershipVisuals();
             Log($"Welcome to {catalog.rules.gameName}. This is now a real 3D Monopoly loop: roll, move, buy, rent, build, bankrupt.");
+            Log($"Welcome to {catalog.rules.gameName}. Right-click drag to orbit, scroll to zoom.");
         }
 
         public void RequestRoll()
         {
-            if (!turnInProgress && ActivePlayerCount > 1)
+            if (!turnInProgress && ActivePlayerCount > 1 && players.Count > 0)
             {
                 StartCoroutine(PlayTurn());
             }
@@ -74,18 +74,14 @@ namespace InsaneMonopoly.Runtime
         public void RequestSampleTrade()
         {
             var current = players[currentPlayerIndex];
-            var partner = FindTradePartner(current.PlayerIndex);
+            var partner = players.FirstOrDefault(player => player.PlayerIndex != current.PlayerIndex && !player.IsBankrupt);
             if (partner == null)
             {
                 return;
             }
 
-            var currentOwned = new List<PropertyLedgerEntry>();
-            var partnerOwned = new List<PropertyLedgerEntry>();
-            ledger.GetOwnedBy(current.PlayerIndex, currentOwned);
-            ledger.GetOwnedBy(partner.PlayerIndex, partnerOwned);
-            var currentProperty = currentOwned.Count > 0 ? currentOwned[0] : null;
-            var partnerProperty = partnerOwned.Count > 0 ? partnerOwned[0] : null;
+            var currentProperty = ledger.OwnedBy(current.PlayerIndex).FirstOrDefault();
+            var partnerProperty = ledger.OwnedBy(partner.PlayerIndex).FirstOrDefault();
             if (currentProperty == null || partnerProperty == null)
             {
                 Log("Trade desk is open, but both players need property before a sample trade can run.");
@@ -121,6 +117,7 @@ namespace InsaneMonopoly.Runtime
         {
             turnInProgress = true;
             AdvanceToSolventPlayer();
+
             var player = players[currentPlayerIndex];
             ClearHighlights();
             Log($"{player.PlayerName} grabs the dice...");
@@ -142,17 +139,17 @@ namespace InsaneMonopoly.Runtime
 
             var startSpace = player.SpaceIndex;
             var targetSpace = (player.SpaceIndex + rollTotal) % board.Spaces.Count;
-            var passedGo = targetSpace < startSpace;
-            if (passedGo)
+            if (targetSpace < startSpace)
             {
                 player.SetCash(player.Cash + catalog.rules.goSalary);
                 Log($"{player.PlayerName} blasts past GO and collects ${catalog.rules.goSalary}.");
             }
 
             yield return player.MoveTo(board, targetSpace);
-            ResolveLanding(player, board.GetSpace(targetSpace), rollTotal, passedGo);
+            ResolveLanding(player, board.GetSpace(targetSpace), rollTotal);
             board.GetSpace(targetSpace).SetHighlight(true);
             TryAutoBuild(player);
+
             if (!bankruptcy.TryAvoidBankruptcy(player, out var bankruptcyMessage) && !string.IsNullOrWhiteSpace(bankruptcyMessage))
             {
                 Log(bankruptcyMessage);
@@ -163,20 +160,14 @@ namespace InsaneMonopoly.Runtime
             EndTurn();
         }
 
-        private void ResolveLanding(PlayerPawn player, BoardSpaceView space, int diceTotal, bool alreadyCollectedGo)
+        private void ResolveLanding(PlayerPawn player, BoardSpaceView space, int diceTotal)
         {
             var data = space.Data;
             switch (SpaceKindParser.Parse(data.kind))
             {
                 case SpaceKind.Go:
-                    if (!alreadyCollectedGo)
-                    {
-                        player.SetCash(player.Cash + catalog.rules.goSalary);
-                    }
-                    var goMessage = alreadyCollectedGo
-                        ? $"{player.PlayerName} lands on GO after already collecting salary."
-                        : $"{player.PlayerName} lands on GO and collects ${catalog.rules.goSalary}.";
-                    Log(goMessage);
+                    player.SetCash(player.Cash + catalog.rules.goSalary);
+                    Log($"{player.PlayerName} lands on GO and collects ${catalog.rules.goSalary}.");
                     break;
                 case SpaceKind.Tax:
                     var tax = data.amount > 0 ? data.amount : 100;
@@ -191,6 +182,9 @@ namespace InsaneMonopoly.Runtime
                     break;
                 case SpaceKind.GoToJail:
                     SendToJail(player);
+                    var jailIndex = FindSpaceIndex("jail");
+                    player.PlaceAt(board.GetSpace(jailIndex), CountPlayersOnSpace(jailIndex));
+                    Log($"{player.PlayerName} is fired from the jail cannon straight into laser jail.");
                     break;
                 case SpaceKind.Card:
                     DrawCard(player, data.cardDeck);
@@ -223,15 +217,7 @@ namespace InsaneMonopoly.Runtime
                 }
                 else
                 {
-                    var auctionMessage = "auction disabled.";
-                    if (catalog.rules.auctionEnabled && auction.RunBankAuction(data, players, catalog.rules.cashReserve, out auctionMessage))
-                    {
-                        Log(auctionMessage);
-                    }
-                    else
-                    {
-                        Log($"{player.PlayerName} declines {data.name}; {auctionMessage}");
-                    }
+                    Log($"{player.PlayerName} declines {data.name}; auction system would start at ${data.price / 2}.");
                 }
                 return;
             }
@@ -272,7 +258,7 @@ namespace InsaneMonopoly.Runtime
                 return;
             }
 
-            Log($"{player.PlayerName} triggers {data.name}: {data.description}");
+            Log($"{player.PlayerName} triggers {data.name}: {((BoardSpaceData)(data)).description}");
         }
 
         private void DrawCard(PlayerPawn player, string deck)
@@ -325,6 +311,7 @@ namespace InsaneMonopoly.Runtime
         private void SpawnPlayers(int count)
         {
             players.Clear();
+
             for (var i = 0; i < count; i++)
             {
                 var pawnObject = new GameObject($"Player {i + 1} Pawn");
@@ -376,7 +363,7 @@ namespace InsaneMonopoly.Runtime
                 return;
             }
 
-            var winner = FindFirstActivePlayer();
+            var winner = players.FirstOrDefault(player => !player.IsBankrupt);
             if (winner != null)
             {
                 Log($"{winner.PlayerName} is the last player standing and wins Insane Monopoly.");
@@ -396,59 +383,9 @@ namespace InsaneMonopoly.Runtime
             return 0;
         }
 
-
-        private PlayerPawn FindTradePartner(int currentPlayer)
-        {
-            for (var i = 0; i < players.Count; i++)
-            {
-                if (players[i].PlayerIndex != currentPlayer && !players[i].IsBankrupt)
-                {
-                    return players[i];
-                }
-            }
-
-            return null;
-        }
-
-        private PlayerPawn FindFirstActivePlayer()
-        {
-            for (var i = 0; i < players.Count; i++)
-            {
-                if (!players[i].IsBankrupt)
-                {
-                    return players[i];
-                }
-            }
-
-            return null;
-        }
-
-        private int CountActivePlayers()
-        {
-            var count = 0;
-            for (var i = 0; i < players.Count; i++)
-            {
-                if (!players[i].IsBankrupt)
-                {
-                    count += 1;
-                }
-            }
-
-            return count;
-        }
-
         private int CountPlayersOnSpace(int spaceIndex)
         {
-            var count = 0;
-            for (var i = 0; i < players.Count; i++)
-            {
-                if (players[i].SpaceIndex == spaceIndex && !players[i].IsBankrupt)
-                {
-                    count += 1;
-                }
-            }
-
-            return count;
+            return players.Count(player => player.SpaceIndex == spaceIndex && !player.IsBankrupt);
         }
 
         private void ClearHighlights()

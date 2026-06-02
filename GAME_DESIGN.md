@@ -8,7 +8,7 @@ No Steam Workshop HTML file was available in this repository. This document ther
 
 - **Chaotic but readable:** expanded Monopoly pacing, higher cash flow, and frequent special events.
 - **Config-first:** board spaces, cards, events, property values, and rule toggles live in JSON.
-- **Offline executable first:** the primary deliverable is a local Windows Unity `.exe` with no Steam, Tabletop Simulator, or online-service dependency.
+- **Playable anywhere:** responsive web client, local save/load, real-time online lobbies, and Electron desktop packaging.
 - **8-player ready:** human, AI, spectator, reconnect, host permissions, and replay-friendly event logs.
 
 ## Player Count and Setup
@@ -16,7 +16,7 @@ No Steam Workshop HTML file was available in this repository. This document ther
 - 2–8 players.
 - Starting cash: $1,800.
 - Salary for passing GO: $250.
-- Supported participant types: local human and AI. Online spectators/remote play are out of scope for the primary offline executable.
+- Supported participant types: local human, remote human, spectator, and AI.
 - AI difficulties: easy, normal, hard, insane.
 
 ## Board Layout
@@ -135,9 +135,9 @@ Two inferred decks are provided:
 
 AI evaluates property by purchase price, rent potential, set-completion pressure, liquidity, and difficulty/risk profile. Higher difficulties bid more aggressively, identify trade targets, and reserve cash for rent exposure.
 
-## Save and Offline Scope
+## Save, Replay, and Multiplayer
 
 - Every game state is serializable JSON.
-- The Unity executable is the primary target and should support local save/load.
-- Online lobbies, hosted multiplayer, Steam integration, and Tabletop Simulator dependencies are not required for the primary product.
-- The existing web/server scaffold is legacy/reference tooling, not the shipping game experience.
+- SQLite stores local games and replay events.
+- PostgreSQL can use the same schema shape for hosted play.
+- Socket.io events support lobby create/join, chat, start, roll, state sync, and reconnect-ready game loading.

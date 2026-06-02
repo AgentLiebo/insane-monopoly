@@ -1,32 +1,25 @@
 # Insane Monopoly
 
-Insane Monopoly is now focused on a standalone **offline Unity Windows game**: a polished digital Monopoly-style board game with automated turns, AI opponents, animated dice, automatic movement/rent/cards/auctions, and data-driven rules.
+Insane Monopoly is being pivoted from the initial React/Electron scaffold into a proper 3D Unity tabletop game — the “Monopoly on steroids” direction.
 
-It is **not** trying to recreate Tabletop Simulator and does not require Steam, online services, or Tabletop Simulator dependencies.
+## Run the 3D Unity game
 
-## Run the Unity game in the editor
-
-1. Install Unity 2022.3 LTS with the Windows desktop build module.
+1. Install Unity 2022.3 LTS.
 2. Open the `Unity/` folder as a Unity project.
 3. Open `Assets/Scenes/Main.unity`.
 4. Press **Play**.
 
-## Build the Windows executable
+See [`docs/UNITY.md`](docs/UNITY.md) for controls, data file locations, and build steps. 
+See [`docs/UNITY_ARCHITECTURE.md`](docs/UNITY_ARCHITECTURE.md) for the 3D Monopoly engine layout.
 
-From the Unity menu, run:
+## Legacy web scaffold
 
-```text
-Insane Monopoly > Build Windows EXE
+The earlier React/Node scaffold still exists for reference and possible future web services. Its commands are:
+
+```bash
+npm install
+npm run dev
+npm run dev:server
 ```
 
-The output path is:
-
-```text
-Unity/Builds/Windows/InsaneMonopoly.exe
-```
-
-See [`docs/OFFLINE_WINDOWS_GAME.md`](docs/OFFLINE_WINDOWS_GAME.md) for the product target and [`docs/UNITY_ARCHITECTURE.md`](docs/UNITY_ARCHITECTURE.md) for the rules-engine layout.
-
-## Legacy web/server scaffold
-
-The React/Node files remain as reference tooling and possible future services, but they are no longer the primary game target. The main deliverable is the offline Unity executable.
+The Unity project is now the primary playable direction.
