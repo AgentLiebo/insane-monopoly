@@ -47,8 +47,6 @@ namespace InsaneMonopoly.Runtime
 
         public int HouseCost => houseCost > 0 ? houseCost : Math.Max(50, price / 2);
         public int MortgageValue => mortgageValue > 0 ? mortgageValue : price / 2;
-        public int amount;
-        public string description = string.Empty;
     }
 
     [Serializable]
