@@ -1,0 +1,5 @@
+[
+  { "id": "portal_pad", "name": "Portal Pad", "description": "Roll one die and jump forward that many spaces; resolve the destination.", "effect": { "type": "bonusMove", "dice": 1 } },
+  { "id": "tax_refund", "name": "Tax Refund Office", "description": "Collect half of the Free Parking jackpot, rounded down.", "effect": { "type": "collectJackpotFraction", "fraction": 0.5 } },
+  { "id": "boss_fight", "name": "Boss Fight", "description": "Pay 100 to fight the boss. Roll 8+ on two dice to collect 300; otherwise lose the fee.", "effect": { "type": "bossFight", "entryFee": 100, "target": 8, "reward": 300 } }
+]
