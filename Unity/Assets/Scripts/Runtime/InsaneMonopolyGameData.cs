@@ -24,6 +24,7 @@ namespace InsaneMonopoly.Runtime
         public bool auctionEnabled = true;
         public bool freeParkingJackpot = true;
         public int upgradeLevels = 5;
+        public int cashReserve = 250;
     }
 
     [Serializable]
@@ -37,6 +38,15 @@ namespace InsaneMonopoly.Runtime
         public string cardDeck = string.Empty;
         public int price;
         public int rent;
+        public int[] houseRent = Array.Empty<int>();
+        public int hotelRent;
+        public int houseCost;
+        public int mortgageValue;
+        public int amount;
+        public string description = string.Empty;
+
+        public int HouseCost => houseCost > 0 ? houseCost : Math.Max(50, price / 2);
+        public int MortgageValue => mortgageValue > 0 ? mortgageValue : price / 2;
         public int amount;
         public string description = string.Empty;
     }
@@ -51,6 +61,27 @@ namespace InsaneMonopoly.Runtime
         public int moveDelta;
         public string moveToSpaceId = string.Empty;
         public string statusEffect = string.Empty;
+    }
+
+    public static class CatalogExtensions
+    {
+        public static BoardSpaceData FindSpace(this InsaneMonopolyCatalog catalog, string spaceId)
+        {
+            if (catalog == null || catalog.spaces == null)
+            {
+                return null;
+            }
+
+            foreach (var space in catalog.spaces)
+            {
+                if (space.id == spaceId)
+                {
+                    return space;
+                }
+            }
+
+            return null;
+        }
     }
 
     public enum SpaceKind

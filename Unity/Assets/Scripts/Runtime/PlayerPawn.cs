@@ -12,6 +12,9 @@ namespace InsaneMonopoly.Runtime
         public int PlayerIndex { get; private set; }
         public int SpaceIndex { get; private set; }
         public int Cash { get; private set; }
+        public int JailTurns { get; private set; }
+        public int GetOutOfJailCards { get; private set; }
+        public bool IsBankrupt { get; private set; }
         public string PlayerName { get; private set; } = "Player";
 
         public void Initialize(int playerIndex, string playerName, int startingCash, Color color)
@@ -47,6 +50,22 @@ namespace InsaneMonopoly.Runtime
         public void SetCash(int cash)
         {
             Cash = cash;
+        }
+
+        public void SetJailTurns(int jailTurns)
+        {
+            JailTurns = Mathf.Max(0, jailTurns);
+        }
+
+        public void SetGetOutOfJailCards(int cardCount)
+        {
+            GetOutOfJailCards = Mathf.Max(0, cardCount);
+        }
+
+        public void SetBankrupt(bool bankrupt)
+        {
+            IsBankrupt = bankrupt;
+            gameObject.SetActive(!bankrupt);
         }
 
         public void PlaceAt(BoardSpaceView space, int pawnCountOnSpace)

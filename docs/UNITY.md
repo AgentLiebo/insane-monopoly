@@ -59,11 +59,16 @@ The included `ProjectSettings/EditorBuildSettings.asset` already registers the m
 - Animated dice roll presentation.
 - Pawn movement with hop animation.
 - GO salary, taxes, Free Parking pot, Go To Jail, and card landing events.
+- Property ownership, rent payment, railroad/utility rent scaling, mortgages, and bankruptcy checks.
+- Full-set building rules with visible house and hotel markers.
+- Jail payment/cards/doubles handling, sample trading, AI buy/build heuristics, and save JSON export.
 - Legacy IMGUI HUD for fast iteration.
 
 ## Next Unity milestones
 
 - Replace primitive placeholders with modeled miniatures and VFX.
+- Replace sample trade/export controls with production UI Toolkit panels.
+- Add auctions, deed inspection, and manual mortgage/sell-house screens.
 - Add ownership deeds, rent enforcement, auctions, mortgages, trades, and bankruptcy UI.
 - Add Photon/Netcode multiplayer once the tabletop feel is locked.
 - Replace IMGUI with UI Toolkit or uGUI panels.

@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 
 namespace InsaneMonopoly.Runtime
@@ -23,6 +24,7 @@ namespace InsaneMonopoly.Runtime
                 return;
             }
 
+            GUI.Box(new Rect(20, 20, 390, 320), GUIContent.none, panelStyle);
             GUI.Box(new Rect(20, 20, 360, 250), GUIContent.none, panelStyle);
             GUI.Label(new Rect(36, 32, 330, 34), "INSANE MONOPOLY 3D", titleStyle);
             GUI.Label(new Rect(36, 72, 330, 28), $"Dice: {turnController.LastDiceText}", bodyStyle);
@@ -31,17 +33,30 @@ namespace InsaneMonopoly.Runtime
             var current = turnController.Players.Count == 0 ? null : turnController.Players[turnController.CurrentPlayerIndex];
             GUI.Label(new Rect(36, 128, 330, 28), current == null ? "No players" : $"Turn: {current.PlayerName}", bodyStyle);
             GUI.enabled = !turnController.TurnInProgress;
+            if (GUI.Button(new Rect(36, 168, 330, 48), turnController.TurnInProgress ? "Rolling..." : "ROLL THE CHAOS DICE", buttonStyle))
             if (GUI.Button(new Rect(36, 168, 300, 48), turnController.TurnInProgress ? "Rolling..." : "ROLL THE CHAOS DICE", buttonStyle))
             {
                 turnController.RequestRoll();
             }
             GUI.enabled = true;
+            if (GUI.Button(new Rect(36, 224, 158, 36), "SAMPLE TRADE"))
+            {
+                turnController.RequestSampleTrade();
+            }
+            if (GUI.Button(new Rect(208, 224, 158, 36), "PRINT SAVE JSON"))
+            {
+                Debug.Log(turnController.ExportSaveJson());
+            }
+            GUI.Label(new Rect(36, 268, 330, 24), $"Players alive: {turnController.ActivePlayerCount}", bodyStyle);
 
             GUI.Box(new Rect(Screen.width - 390, 20, 370, 300), GUIContent.none, panelStyle);
             GUI.Label(new Rect(Screen.width - 370, 34, 330, 26), "Players", titleStyle);
             var y = 72f;
             foreach (var player in turnController.Players)
             {
+                var owned = turnController.Ledger == null ? 0 : turnController.Ledger.OwnedBy(player.PlayerIndex).Count();
+                var status = player.IsBankrupt ? "BANKRUPT" : player.JailTurns > 0 ? $"Jail {player.JailTurns}" : $"Space {player.SpaceIndex}";
+                GUI.Label(new Rect(Screen.width - 370, y, 340, 24), $"{player.PlayerName}: ${player.Cash} | {owned} deeds | {status}", bodyStyle);
                 GUI.Label(new Rect(Screen.width - 370, y, 330, 24), $"{player.PlayerName}: ${player.Cash} | Space {player.SpaceIndex}", bodyStyle);
                 y += 28f;
             }

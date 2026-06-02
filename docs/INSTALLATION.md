@@ -15,6 +15,7 @@ To run it:
 3. Open `Assets/Scenes/Main.unity`.
 4. Press **Play**.
 
+See [`UNITY.md`](UNITY.md) for controls and build instructions, and [`UNITY_ARCHITECTURE.md`](UNITY_ARCHITECTURE.md) for the Unity engine layout.
 See [`UNITY.md`](UNITY.md) for controls and build instructions.
 
 ## Legacy web/server scaffold
