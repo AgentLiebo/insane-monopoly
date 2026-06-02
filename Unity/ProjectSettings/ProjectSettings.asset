@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 26
+  productGUID: 9a0f3edc7c3a40a58c1db326fae91001
+  companyName: Insane Table Games
+  productName: Insane Monopoly 3D
+  defaultScreenWidth: 1920
+  defaultScreenHeight: 1080
+  runInBackground: 1
+  captureSingleScreen: 0
+  usePlayerLog: 1
+  bakeCollisionMeshes: 0
+  forceSingleInstance: 0
+  resizableWindow: 1
+  useMacAppStoreValidation: 0
