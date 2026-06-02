@@ -29,12 +29,14 @@ npm run dev:server
 ```
 
 Open the Vite URL for the web client. For desktop Electron development, run:
+Open the Vite URL for the web client. For desktop development, run:
 
 ```bash
 npm run electron:dev
 ```
 
 For packaged Electron builds:
+For packaged desktop builds:
 
 ```bash
 npm run electron:package
