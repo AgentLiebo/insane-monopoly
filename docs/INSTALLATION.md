@@ -16,6 +16,7 @@ To run it:
 4. Press **Play**.
 
 See [`UNITY.md`](UNITY.md) for controls and build instructions, and [`UNITY_ARCHITECTURE.md`](UNITY_ARCHITECTURE.md) for the Unity engine layout.
+See [`UNITY.md`](UNITY.md) for controls and build instructions.
 
 ## Legacy web/server scaffold
 
@@ -29,12 +30,14 @@ npm run dev:server
 ```
 
 Open the Vite URL for the web client. For desktop Electron development, run:
+Open the Vite URL for the web client. For desktop development, run:
 
 ```bash
 npm run electron:dev
 ```
 
 For packaged Electron builds:
+For packaged desktop builds:
 
 ```bash
 npm run electron:package

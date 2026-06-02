@@ -29,6 +29,7 @@ namespace InsaneMonopoly.Runtime
         private BankruptcySystem bankruptcy;
         private MonopolyAiSystem ai;
         private SaveSystem saveSystem;
+        private InsaneMonopolyCatalog catalog = new InsaneMonopolyCatalog();
         private int currentPlayerIndex;
         private int freeParkingPot = 500;
         private bool turnInProgress;
@@ -58,11 +59,14 @@ namespace InsaneMonopoly.Runtime
             SpawnPlayers(Mathf.Clamp(humanPlayers, catalog.rules.minPlayers, catalog.rules.maxPlayers));
             SyncBoardOwnershipVisuals();
             Log($"Welcome to {catalog.rules.gameName}. This is now a real 3D Monopoly loop: roll, move, buy, rent, build, bankrupt.");
+            SpawnPlayers(Mathf.Clamp(humanPlayers, catalog.rules.minPlayers, catalog.rules.maxPlayers));
+            Log($"Welcome to {catalog.rules.gameName}. Right-click drag to orbit, scroll to zoom.");
         }
 
         public void RequestRoll()
         {
             if (!turnInProgress && ActivePlayerCount > 1)
+            if (!turnInProgress && players.Count > 0)
             {
                 StartCoroutine(PlayTurn());
             }
@@ -114,6 +118,9 @@ namespace InsaneMonopoly.Runtime
         {
             turnInProgress = true;
             AdvanceToSolventPlayer();
+        private IEnumerator PlayTurn()
+        {
+            turnInProgress = true;
             var player = players[currentPlayerIndex];
             ClearHighlights();
             Log($"{player.PlayerName} grabs the dice...");
@@ -156,6 +163,13 @@ namespace InsaneMonopoly.Runtime
         }
 
         private void ResolveLanding(PlayerPawn player, BoardSpaceView space, int diceTotal)
+            ResolveLanding(player, board.GetSpace(targetSpace));
+            board.GetSpace(targetSpace).SetHighlight(true);
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
+            turnInProgress = false;
+        }
+
+        private void ResolveLanding(PlayerPawn player, BoardSpaceView space)
         {
             var data = space.Data;
             switch (SpaceKindParser.Parse(data.kind))
@@ -177,6 +191,9 @@ namespace InsaneMonopoly.Runtime
                     break;
                 case SpaceKind.GoToJail:
                     SendToJail(player);
+                    var jailIndex = FindSpaceIndex("jail");
+                    player.PlaceAt(board.GetSpace(jailIndex), CountPlayersOnSpace(jailIndex));
+                    Log($"{player.PlayerName} is fired from the jail cannon straight into laser jail.");
                     break;
                 case SpaceKind.Card:
                     DrawCard(player, data.cardDeck);
@@ -188,6 +205,10 @@ namespace InsaneMonopoly.Runtime
                     break;
                 default:
                     ResolveSpecialSpace(player, data);
+                    Log($"{player.PlayerName} lands on {data.name}. Prototype action: buy ${data.price} / rent ${data.rent}.");
+                    break;
+                default:
+                    Log($"{player.PlayerName} triggers {data.name}: {data.description}");
                     break;
             }
         }
@@ -303,11 +324,25 @@ namespace InsaneMonopoly.Runtime
         private void SpawnPlayers(int count)
         {
             players.Clear();
+            }
+        }
+
+        private void SpawnPlayers(int count)
+        {
+            players.Clear();
+            var colors = new[]
+            {
+                Color.cyan, Color.magenta, Color.yellow, Color.green,
+                new Color(1f, 0.45f, 0.1f), new Color(0.45f, 0.6f, 1f),
+                new Color(0.8f, 0.25f, 1f), Color.white
+            };
+
             for (var i = 0; i < count; i++)
             {
                 var pawnObject = new GameObject($"Player {i + 1} Pawn");
                 var pawn = pawnObject.AddComponent<PlayerPawn>();
                 pawn.Initialize(i, $"Player {i + 1}", catalog.rules.startingCash, pawnColors[i % pawnColors.Length]);
+                pawn.Initialize(i, $"Player {i + 1}", catalog.rules.startingCash, colors[i % colors.Length]);
                 pawn.PlaceAt(board.GetSpace(0), i);
                 players.Add(pawn);
             }
@@ -377,6 +412,7 @@ namespace InsaneMonopoly.Runtime
         private int CountPlayersOnSpace(int spaceIndex)
         {
             return players.Count(player => player.SpaceIndex == spaceIndex && !player.IsBankrupt);
+            return players.Count(player => player.SpaceIndex == spaceIndex);
         }
 
         private void ClearHighlights()
@@ -391,6 +427,7 @@ namespace InsaneMonopoly.Runtime
         {
             eventLog.Insert(0, message);
             if (eventLog.Count > 10)
+            if (eventLog.Count > 8)
             {
                 eventLog.RemoveAt(eventLog.Count - 1);
             }

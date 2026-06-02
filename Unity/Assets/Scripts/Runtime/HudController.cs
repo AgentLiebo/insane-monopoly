@@ -25,6 +25,7 @@ namespace InsaneMonopoly.Runtime
             }
 
             GUI.Box(new Rect(20, 20, 390, 320), GUIContent.none, panelStyle);
+            GUI.Box(new Rect(20, 20, 360, 250), GUIContent.none, panelStyle);
             GUI.Label(new Rect(36, 32, 330, 34), "INSANE MONOPOLY 3D", titleStyle);
             GUI.Label(new Rect(36, 72, 330, 28), $"Dice: {turnController.LastDiceText}", bodyStyle);
             GUI.Label(new Rect(36, 100, 330, 28), $"Free Parking Pot: ${turnController.FreeParkingPot}", bodyStyle);
@@ -33,6 +34,7 @@ namespace InsaneMonopoly.Runtime
             GUI.Label(new Rect(36, 128, 330, 28), current == null ? "No players" : $"Turn: {current.PlayerName}", bodyStyle);
             GUI.enabled = !turnController.TurnInProgress;
             if (GUI.Button(new Rect(36, 168, 330, 48), turnController.TurnInProgress ? "Rolling..." : "ROLL THE CHAOS DICE", buttonStyle))
+            if (GUI.Button(new Rect(36, 168, 300, 48), turnController.TurnInProgress ? "Rolling..." : "ROLL THE CHAOS DICE", buttonStyle))
             {
                 turnController.RequestRoll();
             }
@@ -55,6 +57,7 @@ namespace InsaneMonopoly.Runtime
                 var owned = turnController.Ledger == null ? 0 : turnController.Ledger.OwnedBy(player.PlayerIndex).Count();
                 var status = player.IsBankrupt ? "BANKRUPT" : player.JailTurns > 0 ? $"Jail {player.JailTurns}" : $"Space {player.SpaceIndex}";
                 GUI.Label(new Rect(Screen.width - 370, y, 340, 24), $"{player.PlayerName}: ${player.Cash} | {owned} deeds | {status}", bodyStyle);
+                GUI.Label(new Rect(Screen.width - 370, y, 330, 24), $"{player.PlayerName}: ${player.Cash} | Space {player.SpaceIndex}", bodyStyle);
                 y += 28f;
             }
 
