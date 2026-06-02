@@ -1,0 +1,19 @@
+{
+  "name": "Insane Monopoly",
+  "version": "0.1.0",
+  "sourceNote": "No source HTML was present in the repository. This ruleset is an inferred, compatible expanded Monopoly-style implementation and all inferred systems are marked in GAME_DESIGN.md.",
+  "playerLimits": { "min": 2, "max": 8 },
+  "startingCash": 1800,
+  "salary": 250,
+  "jail": { "spaceId": "jail", "maxTurns": 3, "bail": 75, "doublesEscape": true },
+  "auction": { "enabled": true, "minimumBid": 10, "bidIncrement": 10, "timerSeconds": 30 },
+  "houses": { "maxHouses": 4, "hotelAfterHouses": 4, "insaneTowerAfterHotels": 1 },
+  "victory": { "type": "lastPlayerStanding", "alternateNetWorthTarget": 10000 },
+  "houseRules": {
+    "freeParkingJackpot": true,
+    "snakeEyesBonus": 100,
+    "speedDie": false,
+    "auctionUnboughtProperties": true,
+    "rentInJail": true
+  }
+}
