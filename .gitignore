@@ -1,0 +1,27 @@
+# Node / web scaffold artifacts
+node_modules/
+dist/
+release/
+*.log
+.env
+
+# Local databases
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Unity generated folders
+Unity/Library/
+Unity/Temp/
+Unity/Obj/
+Unity/Build/
+Unity/Builds/
+Unity/Logs/
+Unity/UserSettings/
+Unity/MemoryCaptures/
+Unity/Recordings/
+Unity/*.csproj
+Unity/*.sln
+Unity/*.userprefs
+Unity/.vs/
+Unity/.idea/
